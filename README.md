@@ -13,7 +13,7 @@ git clone https://github.com/AleVin1995/Reduced_Templates.git
 
 cd Reduced_Templates
 
-conda env create -f envs/MinTEs_env.ymml
+conda env create -f envs/MinTEs_env.yml
 ```
 
 ## References
