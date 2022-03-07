@@ -8,8 +8,37 @@ import scipy.stats as stats
 from sklearn.linear_model import LinearRegression
 import optparse
 
-# load data
+
 def load_data(fold_change, bayes_factor, essential_genes, non_essential_genes):
+    """
+    Load data
+
+    Args:
+        fold_change: dataframe (tsv format) containing depletion fold-change scores.
+                     First column must contain single-guide RNA (sgRNA) IDs.
+                     Second column must contain the gene symbols targeted by the 
+                     corresponding sgRNA.
+                     All the remaining columns represent CRISPR-Cas9 screens (i.e., 
+                     cell line IDs), containing fold-change scores derived from the
+                     sgRNA i targeting gene j in screen c.
+        bayes_factor: same format as per the fold_change argument.  
+                      First column must contain single-guide RNA (sgRNA) IDs.
+                      Second column must contain the gene symbols targeted by the 
+                      corresponding sgRNA.
+                      All the remaining columns represent CRISPR-Cas9 screens (i.e., 
+                      cell line IDs), containing bayes factors derived from the
+                      corresponding screen in the fold_change dataframe using BAGEL2
+                      with user-provided sets of full reference essential and non-
+                      essential genes.
+        essential_genes: dataframe (tsv format) containing the full reference set of
+                         essential genes. 
+                         First column must contain gene symbol (other columns are not
+                         necessary).
+        nonessential_genes: dataframe (tsv format) containing the full reference set 
+                            of essential genes.
+                            First column must contain gene symbol (other columns are 
+                            not necessary).
+    """
     fc = pd.read_table(fold_change)
     bf = pd.read_table(bayes_factor)
 
@@ -23,8 +52,18 @@ def load_data(fold_change, bayes_factor, essential_genes, non_essential_genes):
 
     return(fc, bf, coreEss, nonEss)
 
-# rounding BAGEL subsampled output to the number of decimals of the total input
+
 def rounding(tot, sub):
+    """
+    Rounding BAGEL-outputted bayes factor array, obtained with reduce templates, to 
+    the number of decimals present in the total array (default 4)
+
+    Args:
+        tot: array of bayes factors using the full reference gene templates.
+        sub: array of bayes factors using the reduced gene templates at a specific
+             according to the parameters (CRISPR-Cas9 library, reference gene sets
+             and percentage of subsampling).
+    """
     tot = str(tot)
     tot = tot[1:(len(tot) - 1)].split(' ')
 
@@ -32,14 +71,50 @@ def rounding(tot, sub):
     sub = np.round(sub, round_dec)
     return sub
 
-# testing pre-defined subsampled sets of reference genes against total
+
 def testing(fold_change, bayes_factor, essential_genes, non_essential_genes,
                 sub_ess, sub_non, scaling):
     fc, bf, coreEss, nonEss = fold_change, bayes_factor, essential_genes, non_essential_genes
 
-    # assume 1st column contains sgRNA IDs
-    # 2nd column the corresponding gene IDs
-    # the rest the cell line IDs
+    """
+    Testing performances of pre-defined reduce templates vs full gene templates
+
+    Args:
+        fold_change: dataframe (tsv format) containing depletion fold-change scores.
+                     First column must contain single-guide RNA (sgRNA) IDs.
+                     Second column must contain the gene symbols targeted by the 
+                     corresponding sgRNA.
+                     All the remaining columns represent CRISPR-Cas9 screens (i.e., 
+                     cell line IDs), containing fold-change scores derived from the
+                     sgRNA i targeting gene j in screen c.
+        bayes_factor: same format as per the fold_change argument.  
+                      First column must contain single-guide RNA (sgRNA) IDs.
+                      Second column must contain the gene symbols targeted by the 
+                      corresponding sgRNA.
+                      All the remaining columns represent CRISPR-Cas9 screens (i.e., 
+                      cell line IDs), containing bayes factors derived from the
+                      corresponding screen in the fold_change dataframe using BAGEL2
+                      with user-provided sets of full reference essential and non-
+                      essential genes.
+        essential_genes: dataframe (tsv format) containing the full reference set of
+                         essential genes. 
+                         First column must contain gene symbol (other columns are not
+                         necessary).
+        nonessential_genes: dataframe (tsv format) containing the full reference set 
+                            of essential genes.
+                            First column must contain gene symbol (other columns are 
+                            not necessary).
+        sub_ess: dataframe (tsv format) containing the reduced reference set of 
+                 essential genes. 
+        sub_non: dataframe (tsv format) containing the reduced reference set of 
+                 nonessential genes. 
+        scaling: boolean parameter, whether to scale computed bayes factor to 5%
+                 false discovery rate (default is True).
+    """
+
+    # 1st column must contain single-guide RNA (sgRNA) IDs
+    # 2nd column must contain the gene symbols targeted by the corresponding sgRNA
+    # All the remaining columns represent CRISPR-Cas9 screens (i.e., cell line IDs)
     fc = fc.sort_values(fc.columns[0])
     bf = bf.sort_values(bf.columns[0])
     
@@ -95,11 +170,56 @@ def testing(fold_change, bayes_factor, essential_genes, non_essential_genes,
     res["combo_non"] = sub_non.tolist() + Xnan * (top - len(sub_non))
     return(res)
 
-# simulated annealing algorithm
-def annealing(fold_change, bayes_factor, essential_genes, non_essential_genes,
+
+def greedy(fold_change, bayes_factor, essential_genes, non_essential_genes,
                 subsample, step, fraction_train, seed, scaling, sub_rate, const):
     fc, bf, coreEss, nonEss = fold_change, bayes_factor, essential_genes, non_essential_genes
     frTrain = fraction_train
+
+    """
+    Greedy-search strategy implemented by MinTEs to select optimised reduced templates according
+    to user-defined parameters (i.e., CRISPR-Cas9 library, reference gene sets and percentage of 
+    subsampling)
+
+    Args:
+        fold_change: dataframe (tsv format) containing depletion fold-change scores.
+                     First column must contain single-guide RNA (sgRNA) IDs.
+                     Second column must contain the gene symbols targeted by the 
+                     corresponding sgRNA.
+                     All the remaining columns represent CRISPR-Cas9 screens (i.e., 
+                     cell line IDs), containing fold-change scores derived from the
+                     sgRNA i targeting gene j in screen c.
+        bayes_factor: same format as per the fold_change argument.  
+                      First column must contain single-guide RNA (sgRNA) IDs.
+                      Second column must contain the gene symbols targeted by the 
+                      corresponding sgRNA.
+                      All the remaining columns represent CRISPR-Cas9 screens (i.e., 
+                      cell line IDs), containing bayes factors derived from the
+                      corresponding screen in the fold_change dataframe using BAGEL2
+                      with user-provided sets of full reference essential and non-
+                      essential genes.
+        essential_genes: dataframe (tsv format) containing the full reference set of
+                         essential genes. 
+                         First column must contain gene symbol (other columns are not
+                         necessary).
+        nonessential_genes: dataframe (tsv format) containing the full reference set 
+                            of essential genes.
+                            First column must contain gene symbol (other columns are 
+                            not necessary).
+        subsample: percentage of subsampling (default is 0.05) in order to obtain
+                   reduced gene templates.
+        step: nº iterations without improvement (default is 10) before decreasing the 
+              substitution rate (in case of a dynamic substitution rate).
+        fraction_train: Fraction of cell lines used for training (0,1] in case of 
+                        multiple screens (i.e., more than one cell line screened).
+        seed: method to initialise random number generator (optional).
+        scaling: boolean parameter, whether to scale computed bayes factor to 5%
+                 false discovery rate (default is True).
+        sub_rate: substitution rate applied between the subset of reference genes and
+                  the hold-out genes (default is 1).
+        const: boolean parameter, whether to apply a static substitution rate (default
+               is False).
+    """
 
     np.random.seed(seed)
 
@@ -208,8 +328,7 @@ def annealing(fold_change, bayes_factor, essential_genes, non_essential_genes,
                 JS[count] = JS[count - 1]
                 combo_ess, combo_non = combo_ess_old, combo_non_old
         
-        #print(count, JS[count], sr_rec[count])
-        # stop algorithm if there is no improvement for n consecutive steps
+        # stop algorithm if there is no improvement for count consecutive steps
         if count >= step:
             if JS[count] == JS[count - step] and const == True:
                 keep = False
@@ -264,7 +383,7 @@ def annealing(fold_change, bayes_factor, essential_genes, non_essential_genes,
         JS_test = np.mean(JScell)
         JS_test = np.round(JS_test, 4)
     
-    # prepare output dictionary with all summary data
+    # create output dictionary with all summary data
     top = max(len(coreEss), len(nonEss), len(cells_train), len(cells_test), len(JS))
     Xnan = [float("nan")]
 
@@ -286,8 +405,23 @@ def annealing(fold_change, bayes_factor, essential_genes, non_essential_genes,
     res["combo_non"] = combo_non.tolist() + Xnan * (top - len(combo_non))
     return(res)
 
-# compute bayesian factors
+
 def calculate_bayes_factors(train_guides, train_ess, train_non, n_nonEss, scaling = False):
+    """
+    Compute bayes factors from depletion fold-change score in a CRISPR-Cas9 screen
+
+    Args:
+        train_guides: depletion fold-change scores of guides targeting reference genes (either full
+                      reduced gene sets)
+        train_ess: character vector of guides targeting essential reference genes (either full or
+                   reduced gene sets).
+        train_non: character vector of guides targeting nonessential reference genes (either full or
+                   reduced gene sets).
+        n_nonEss: nº of nonessential genes.
+        scaling: boolean parameter, whether to scale computed bayes factor to 5% false discovery 
+                 rate (default is False in this function).
+    """
+
     FC_THRESH = 2 ** (-1.1535 * np.log(n_nonEss + 13.324) + 0.7728)
     
     # gaussian kernel fit onto essential and nonessential training discrete distributions
@@ -327,10 +461,10 @@ def calculate_bayes_factors(train_guides, train_ess, train_non, n_nonEss, scalin
 
     slope, intercept, r_value, p_value, std_err = stats.linregress(np.array(testx), np.array(testy))
     
-    # BF calculation
+    # Bayes factor calculation
     bf = slope * train_guides + intercept
 
-    # BF scaling
+    # Bayes factor scaling
     if scaling:
         bf_ess = slope * train_ess + intercept
         bf_non = slope * train_non + intercept
@@ -348,6 +482,7 @@ def calculate_bayes_factors(train_guides, train_ess, train_non, n_nonEss, scalin
         thr_pos = np.where(ppv >= 0.95)[0]
 
         # In case not possible to scale at 5% FDR
+        # It may happen for low-quality screens
         if len(thr_pos) == 0:
             thr_pos = np.where(ppv == max(ppv))[0]
 
@@ -356,7 +491,7 @@ def calculate_bayes_factors(train_guides, train_ess, train_non, n_nonEss, scalin
 
     return(bf)
 
-# parser function
+
 def main():
     # create OptionParser object
     parser = optparse.OptionParser()
@@ -381,7 +516,7 @@ def main():
     parser.add_option("-o", "--output",
                     dest = "output",
                     type = "string", 
-                    help = "specify output file")
+                    help = "specify output file name")
     parser.add_option("-s", "--seed",
                     dest = "seed",
                     type = "int",
@@ -391,12 +526,12 @@ def main():
                     dest = "subsample",
                     type = "float",
                     default = 0.05, 
-                    help = "Relative frequency of subsampling (0,1]")
+                    help = "Percentage of subsampling (0,1]")
     parser.add_option("--fr_train",
                     dest = "fraction_train",
                     type = "float",
                     default = 1.0, 
-                    help = "fraction of cell lines used for training (0,1]")
+                    help = "Fraction of cell lines used for training (0,1]")
     parser.add_option("--step",
                     dest = "step",
                     type = "int",
@@ -406,12 +541,12 @@ def main():
                     dest = "scaling",
                     action = "store_true",
                     default = False, 
-                    help = "scaling of BF")
+                    help = "scaling of bayes factors")
     parser.add_option("--sub_rate",
                     dest = "sub_rate",
                     type = "float",
                     default = 1.0, 
-                    help = "Starting substitution rate (0,1]")
+                    help = "Initial substitution rate (0,1]")
     parser.add_option("-c", "--constant",
                     dest = "const",
                     action = "store_true",
@@ -420,16 +555,19 @@ def main():
     parser.add_option("--subess",
                     dest = "subess",
                     default = None, 
-                    help = "pre-defined set of reference essential genes")
+                    help = "pre-defined set of reduced reference essential genes")
     parser.add_option("--subnon",
                     dest = "subnon",
                     default = None, 
-                    help = "pre-defined set of reference non-essential genes")
+                    help = "pre-defined set of reduced reference nonessential genes")
 
     (options, args) = parser.parse_args()
     fc, bf, coreEss, nonEss = load_data(options.fold_change, options.bayes_factor,
                                             options.essential, options.nonessential)
 
+    # In case reduce templates are provided, MinTEs will compare the performances
+    # of these reduced templates in predicting fitness genes against those of the
+    # full reference templates
     if options.subess != None and options.subnon != None:
         sub_ess = pd.read_table(options.subess)
         sub_ess = sub_ess.loc[sub_ess.iloc[:, 0].isin(coreEss), "GENE"]
@@ -440,8 +578,12 @@ def main():
         sub_non = sub_non.to_numpy().flatten()
         res = testing(fc, bf, coreEss, nonEss, sub_ess, sub_non, 
                         options.scaling)
+    
+    # Execute MinTEs optimisation to search for the best combination of reduced
+    # templates given user-specified parameters (i.e., CRISPR-Cas9 library, 
+    # reference gene sets and percentage of subsampling)
     else:
-        res = annealing(fc, bf, coreEss, nonEss, options.subsample, 
+        res = greedy(fc, bf, coreEss, nonEss, options.subsample, 
                         options.step, options.fraction_train, 
                         options.seed, options.scaling,
                         options.sub_rate, options.const)
@@ -449,6 +591,6 @@ def main():
     res = pd.DataFrame(res)
     res.to_csv(options.output, sep = '\t', index = False)
 
-# driver code
+
 if __name__ == '__main__':
     main()
