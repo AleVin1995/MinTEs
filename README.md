@@ -4,9 +4,8 @@
 ## Description
 Many analytical tasks performed on data from genome-wide CRISPR-Cas9 screens are either optionally or necessarily performed in a supervised manner. In this scenario, the screening outcomes observed for large sets of positive/negative controls, i.e. genes that are prior known to be essential/nonessential for cell survival, are adopted as benchmark or template classifiers. The analytical tasks accomplished by supervised methods range from quality control [1-5], to fold-change scaling for inter-screen comparisons and interpretability [6-11], to calling statistical significant essential genes [1,9,11-14].<br/>
 However, the size of positive/negative control genes has a significant impact on the scale of the experiment to perform and it proves quite prohibitive for scale-limiteds CRISPR-Cas9 screens (e.g, CRISPR-Cas9 screens using focused libraries, primary cultures, organoids or patient-derived xenografts), where the number of reference genes would become comparable or even larger than that of the genes under investigation.<br/>
-Minimal Template Estimator (MinTEs) [15] is a computational framework for assembling gene templates of reduced size allowing supervised analyses of data from scale-limited CRISPR-Cas9 screens, while having a limited, user-defined impact on the overall library size. MinTEs is trained on two large genome-wide pooled CRISPR-Cas9 datasets from Project Score [16] and Project Achilles [10], respectively.
-
-This module contains the snakemake pipeline to derived reduced gene templates (coming soon..) and the jupyter notebooks are provided to reproduce all the plots shown in "Reduced gene templates for supervised analysis of scale-limited CRISPR-Cas9 fitness screens".
+Minimal Template Estimator (MinTEs) [15] is a computational framework for assembling gene templates of reduced size allowing supervised analyses of data from scale-limited CRISPR-Cas9 screens, while having a limited, user-defined impact on the overall library size. MinTEs is trained on two large genome-wide pooled CRISPR-Cas9 datasets from Project Score [16] and Project Achilles [10], respectively.<br/>
+This repository contains the snakemake pipeline (coming soon..) to derive reduced gene templates from [15].
 
 ## Setup
 Clone code repository and install dependencies:
