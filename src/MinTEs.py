@@ -39,6 +39,7 @@ def load_data(fold_change, bayes_factor, essential_genes, non_essential_genes):
                             First column must contain gene symbol (other columns are 
                             not necessary).
     """
+    
     fc = pd.read_table(fold_change)
     bf = pd.read_table(bayes_factor)
 
@@ -64,6 +65,7 @@ def rounding(tot, sub):
              according to the parameters (CRISPR-Cas9 library, reference gene sets
              and percentage of subsampling).
     """
+
     tot = str(tot)
     tot = tot[1:(len(tot) - 1)].split(' ')
 
