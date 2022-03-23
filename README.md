@@ -1,5 +1,5 @@
 # Reduced gene templates for supervised analysis of scale-limited CRISPR-Cas9 fitness screens
-![alt text](https://github.com/AleVin1995/Reduced_Templates/blob/main/web/Graphical_abstract.png)
+![alt text](https://github.com/AleVin1995/Reduced_Templates/blob/main/images/Graphical_abstract.png)
 
 ## Description
 Many analytical tasks performed on data from genome-wide CRISPR-Cas9 screens are either optionally or necessarily performed in a supervised manner. In this scenario, the screening outcomes observed for large sets of positive/negative controls, i.e. genes that are prior known to be essential/nonessential for cell survival, are adopted as benchmark or template classifiers. The analytical tasks accomplished by supervised methods range from quality control [1-5], to fold-change scaling for inter-screen comparisons and interpretability [6-11], to calling statistical significant essential genes [1,9,11-14].<br/>
