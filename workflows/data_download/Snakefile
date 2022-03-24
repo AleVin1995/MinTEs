@@ -1,0 +1,26 @@
+import os
+
+# paths
+ROOT = os.getcwd()
+resources = os.path.join(ROOT, 'resources')
+
+rule all:
+    input:
+        os.path.join(resources, 'FC', 'Project_Achilles_corrected_FCs.tsv'),
+        os.path.join(resources, 'FC', 'Project_Score_corrected_FCs.tsv')
+
+rule download_sgRNA_fold_change_datasets:
+    output:
+        project_achilles = os.path.join(resources, 'FC', 'Project_Achilles_corrected_FCs.tsv'),
+        project_score = os.path.join(resources, 'FC', 'Project_Score_corrected_FCs.tsv')
+    params:
+        # sgRNA-level fold-changes of project Achilles and Score pre-processed with CRISPRcleanR
+        project_achilles = 'https://figshare.com/ndownloader/files/34488353',
+        project_score = 'https://figshare.com/ndownloader/files/34179900'
+    conda:
+        'envs/MinTEs.yml'
+    shell:
+        '''
+        wget --no-clobber {params.project_achilles} -O {output.project_achilles}
+        wget --no-clobber {params.project_score} -O {output.project_score}
+        '''

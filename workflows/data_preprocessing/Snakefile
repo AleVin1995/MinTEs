@@ -1,0 +1,20 @@
+import os
+
+# paths
+ROOT = os.getcwd()
+resources = os.path.join(ROOT, 'resources')
+
+DATASETS = ['Achilles', 'Score']
+
+rule cell_wise_splitting:
+    input:
+        expand(os.path.join(resources, 'FC', 'Project_{dataset}_corrected_FCs.tsv'), dataset = DATASETS)
+    output:
+        directory(expand(os.path.join(resources, 'FC', 'Project_{dataset}_cells'), dataset = DATASETS))
+    conda:
+        'envs/MinTEs.yml'
+    shell:
+        '''
+        mkdir -p {output}
+        python3 workflows/data_preprocessing/scripts/cell_splitter.py -i "{input}" -p "{output}"
+        '''
