@@ -1,0 +1,6 @@
+{
+    "SBATCH_DEFAULTS": "partition=cpuq mail-type=NONE chdir=/scratch/alessandro.vinceti/Reduced_Templates",
+    "CLUSTER_NAME": "slurm",
+    "CLUSTER_CONFIG": "",
+    "ADVANCED_ARGUMENT_CONVERSION": "no"
+}

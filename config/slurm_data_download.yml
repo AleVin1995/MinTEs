@@ -1,8 +1,0 @@
-__default__:
-    partition: cpuq
-    job-name: preproc
-    mail-type: NONE
-    time: 00:15:00 # time limit for each job
-    cpus-per-task: 1
-    ntasks: 1
-    chdir: /scratch/alessandro.vinceti/Reduced_Templates

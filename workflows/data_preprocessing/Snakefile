@@ -12,7 +12,7 @@ rule cell_wise_splitting:
     output:
         directory(expand(os.path.join(resources, 'FC', 'Project_{dataset}_cells'), dataset = DATASETS))
     conda:
-        'envs/MinTEs.yml'
+        'envs/MinTEs.yaml'
     shell:
         '''
         mkdir -p {output}

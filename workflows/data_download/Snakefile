@@ -18,7 +18,7 @@ rule download_sgRNA_fold_change_datasets:
         project_achilles = 'https://figshare.com/ndownloader/files/34488353',
         project_score = 'https://figshare.com/ndownloader/files/34179900'
     conda:
-        'envs/MinTEs.yml'
+        'envs/MinTEs.yaml'
     shell:
         '''
         wget --no-clobber {params.project_achilles} -O {output.project_achilles}
