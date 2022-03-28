@@ -1,3 +1,4 @@
+clean.sh
 profile/__pycache__/
 resources/
 .snakemake/
