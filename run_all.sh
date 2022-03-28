@@ -13,12 +13,12 @@ set -o nounset
 set -o pipefail
 
 echo 'Download sgRNA-level fold-change datasets'
-snakemake -s workflows/data_download/Snakefile --profile profile --jobs 1
+snakemake -s workflows/data_download/Snakefile --profile profile
 echo 'Finished downloading data'
 
 echo 'Data preprocessing'
 echo 'Cell-wise splitting to be used as BAGEL input'
-snakemake -s workflows/data_preprocessing/Snakefile --profile profile --jobs 1
+#snakemake -s workflows/data_preprocessing/Snakefile --profile profile
 echo 'Single-cell files created'
 
-rm *out
+#rm *out

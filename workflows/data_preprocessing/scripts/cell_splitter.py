@@ -21,19 +21,18 @@ def main():
 
     (options, args) = parser.parse_args()
     
-    options.input = options.input.split(' ')
-    options.path = options.path.split(' ')
+    #options.input = options.input.split(' ')
+    #options.path = options.path.split(' ')
 
-    for infile, outpath in zip(options.input, options.path):
-        # load input file
-        dataset = pd.read_csv(infile, sep='\t')
-        n_cols = len(dataset.columns)
-
-        for col_idx in range(2, n_cols):
-            cell_name = dataset.columns[col_idx]
-            single_cell = dataset.iloc[:,[0,1,col_idx]]
-            single_cell.to_csv(outpath + '/' + cell_name + '.tsv', sep='\t', index=False)
+    # load input file
+    dataset = pd.read_csv(options.input, sep='\t')
+    n_cols = len(dataset.columns)
+    
+    for col_idx in range(2, n_cols):
+        cell_idx = col_idx-1
+        single_cell = dataset.iloc[:,[0,1,col_idx]]
+        single_cell.to_csv(options.path + '/cell_line_' + str(cell_idx) + '.tsv', sep='\t', index=False)
 
 
 if __name__ == '__main__':
-   main()
+    main()

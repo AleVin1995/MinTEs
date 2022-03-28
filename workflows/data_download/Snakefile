@@ -4,23 +4,24 @@ import os
 ROOT = os.getcwd()
 resources = os.path.join(ROOT, 'resources')
 
+DATASETS = ['Achilles', 'Score']
+LINKS = {'Achilles': 'https://figshare.com/ndownloader/files/34488353',
+        'Score': 'https://figshare.com/ndownloader/files/34179900'}
+
 rule all:
     input:
-        os.path.join(resources, 'FC', 'Project_Achilles_corrected_FCs.tsv'),
-        os.path.join(resources, 'FC', 'Project_Score_corrected_FCs.tsv')
+        expand(os.path.join(resources, 'FC', 'Project_{datasets}_corrected_FCs.tsv'), datasets = DATASETS)
 
-rule download_sgRNA_fold_change_datasets:
+rule download_datasets:
     output:
-        project_achilles = os.path.join(resources, 'FC', 'Project_Achilles_corrected_FCs.tsv'),
-        project_score = os.path.join(resources, 'FC', 'Project_Score_corrected_FCs.tsv')
+        os.path.join(resources, 'FC', 'Project_{datasets}_corrected_FCs.tsv')
     params:
-        # sgRNA-level fold-changes of project Achilles and Score pre-processed with CRISPRcleanR
-        project_achilles = 'https://figshare.com/ndownloader/files/34488353',
-        project_score = 'https://figshare.com/ndownloader/files/34179900'
+        # figshare link to project Achilles and Score datasets (sgRNA-level fold-changes 
+        # preprocessed with CRISPRcleanR)
+        link = lambda wildcards: LINKS[wildcards.datasets]
     conda:
         'envs/MinTEs.yaml'
     shell:
         '''
-        wget --no-clobber {params.project_achilles} -O {output.project_achilles}
-        wget --no-clobber {params.project_score} -O {output.project_score}
+        wget --no-clobber {params.link} -O {output}
         '''

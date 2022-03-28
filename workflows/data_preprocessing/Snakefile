@@ -1,20 +1,75 @@
 import os
+import subprocess
 
 # paths
 ROOT = os.getcwd()
 resources = os.path.join(ROOT, 'resources')
 
 DATASETS = ['Achilles', 'Score']
+ESSENTIAL_GENE_SETS = ['ADaM', 'CEGv2']
 
-rule cell_wise_splitting:
+rule all:
     input:
-        expand(os.path.join(resources, 'FC', 'Project_{dataset}_corrected_FCs.tsv'), dataset = DATASETS)
+        expand(os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_{datasets}_cells'), essential_gene_sets = ESSENTIAL_GENE_SETS, datasets = DATASETS)
+
+rule cell_wise_splitting_Project_Achilles:
+    input:
+        os.path.join(resources, 'FC', 'Project_Achilles_corrected_FCs.tsv')
     output:
-        directory(expand(os.path.join(resources, 'FC', 'Project_{dataset}_cells'), dataset = DATASETS))
+        directory(os.path.join(resources, 'FC', 'Project_Achilles_cells'))
     conda:
         'envs/MinTEs.yaml'
     shell:
         '''
         mkdir -p {output}
-        python3 workflows/data_preprocessing/scripts/cell_splitter.py -i "{input}" -p "{output}"
+        python3 workflows/data_preprocessing/scripts/cell_splitter.py -i {input} -p {output}
         '''
+
+rule cell_wise_splitting_Project_Score:
+    input:
+        os.path.join(resources, 'FC', 'Project_Score_corrected_FCs.tsv')
+    output:
+        directory(os.path.join(resources, 'FC', 'Project_Score_cells'))
+    conda:
+        'envs/MinTEs.yaml'
+    shell:
+        '''
+        mkdir -p {output}
+        python3 workflows/data_preprocessing/scripts/cell_splitter.py -i {input} -p {output}
+        '''
+
+rule run_BAGEL_Project_Achilles:
+    input:
+        os.path.join(resources, 'FC', 'Project_Achilles_cells')
+    output:
+        outdirs = [directory(expand(os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_Achilles_cells'), essential_gene_sets = ESSENTIAL_GENE_SETS))]
+    params:
+        nonessential = 'data/NEGv1.txt',
+        seed = 1234
+    run:
+        cells = subprocess.getoutput('ls resources/FC/Project_Achilles_cells').split('\n')
+
+        for single_cell in cells:
+            for idx in range(0,2):
+                command = 'scripts/BAGEL.py -i {input}' + '/' + single_cell + ' -o ' \
+                            + output[idx] + '/' + single_cell + ' -e data/' + \
+                            ESSENTIAL_GENE_SETS[idx] + '.txt -n {params.nonessential} -s {params.seed} -r -NS'
+                shell(command)
+
+rule run_BAGEL_Project_Score:
+    input:
+        os.path.join(resources, 'FC', 'Project_Score_cells')
+    output:
+        outdirs = [directory(expand(os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_Score_cells'), essential_gene_sets = ESSENTIAL_GENE_SETS))]
+    params:
+        nonessential = 'data/NEGv1.txt',
+        seed = 1234
+    run:
+        cells = subprocess.getoutput('ls resources/FC/Project_Score_cells').split('\n')
+
+        for single_cell in cells:
+            for idx in range(0,2):
+                command = 'scripts/BAGEL.py -i {input}' + '/' + single_cell + ' -o ' \
+                            + output[idx] + '/' + single_cell + ' -e data/' + \
+                            ESSENTIAL_GENE_SETS[idx] + '.txt -n {params.nonessential} -s {params.seed} -r -NS'
+                shell(command)
