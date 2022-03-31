@@ -4,24 +4,23 @@ import os
 ROOT = os.getcwd()
 resources = os.path.join(ROOT, 'resources')
 
+# variables
 DATASETS = ['Achilles', 'Score']
 LINKS = {'Achilles': 'https://figshare.com/ndownloader/files/34488353',
         'Score': 'https://figshare.com/ndownloader/files/34179900'}
 
 rule all:
     input:
-        expand(os.path.join(resources, 'FC', 'Project_{datasets}_corrected_FCs.tsv'), datasets = DATASETS)
+        expand(os.path.join(resources, 'FC', 'Project_{datasets}_corrected_FC.tsv'), datasets = DATASETS)
 
 rule download_datasets:
     output:
-        os.path.join(resources, 'FC', 'Project_{datasets}_corrected_FCs.tsv')
+        os.path.join(resources, 'FC', 'Project_{datasets}_corrected_FC.tsv')
     params:
         # figshare link to project Achilles and Score datasets (sgRNA-level fold-changes 
         # preprocessed with CRISPRcleanR)
         link = lambda wildcards: LINKS[wildcards.datasets]
-    conda:
-        'envs/MinTEs.yaml'
     shell:
-        '''
+        """
         wget --no-clobber {params.link} -O {output}
-        '''
+        """

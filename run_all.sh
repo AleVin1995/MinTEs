@@ -3,22 +3,36 @@
 #SBATCH --job-name=main
 #SBATCH --partition=cpuq
 #SBATCH --mail-type=NONE
-#SBATCH --time=00:20:00
+#SBATCH --time=03:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1
 #SBATCH --chdir=/scratch/alessandro.vinceti/Reduced_Templates
 
-set -o errexit
-set -o nounset
-set -o pipefail
+source ~/.bashrc
+conda activate MinTEs
 
 echo 'Download sgRNA-level fold-change datasets'
 snakemake -s workflows/data_download/Snakefile --profile profile
 echo 'Finished downloading data'
 
 echo 'Data preprocessing'
-echo 'Cell-wise splitting to be used as BAGEL input'
-#snakemake -s workflows/data_preprocessing/Snakefile --profile profile
-echo 'Single-cell files created'
+for dataset in "Achilles" "Score"
+do
+    echo $dataset > project.txt
+    snakemake -s workflows/data_preprocessing/Snakefile --profile profile
 
-#rm *out
+    N_datasets=$(ls resources/BF/*/Project_"$dataset"_BF.tsv | wc -l)
+
+    while [[ $N_datasets -lt 2 ]]
+    do
+        sleep 30
+        N_datasets=$(ls resources/BF/*/Project_"$dataset"_BF.tsv | wc -l)
+    done
+done
+
+rm project.txt
+echo 'Assembling and scaling of sgRNA-level Bayes factor datasets'
+
+rm slurm*
+rm -r .snakemake/
+rm -r log/

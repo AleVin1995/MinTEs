@@ -5,71 +5,65 @@ import subprocess
 ROOT = os.getcwd()
 resources = os.path.join(ROOT, 'resources')
 
-DATASETS = ['Achilles', 'Score']
+# variables
+project_file = open('project.txt')
+dataset = project_file.readline().strip()
+project_file.close()
+
+dataset_FC = 'Project_' + dataset + '_corrected_FC.tsv'
+dataset_BF = 'Project_' + dataset + '_BF.tsv'
+
 ESSENTIAL_GENE_SETS = ['ADaM', 'CEGv2']
+
+n_cells = int(subprocess.getoutput('head -1 resources/FC/' + dataset_FC + ' | wc -w'))
+SAMPLES = ['cell_line_' + str(idx) + '.tsv' for idx in range(1, n_cells-1)]
 
 rule all:
     input:
-        expand(os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_{datasets}_cells'), essential_gene_sets = ESSENTIAL_GENE_SETS, datasets = DATASETS)
+        expand(os.path.join(resources, 'BF', '{essential_gene_sets}', dataset_BF),
+                essential_gene_sets=ESSENTIAL_GENE_SETS),
+        expand(os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_' + dataset + '_cells', '{samples}'),
+                essential_gene_sets=ESSENTIAL_GENE_SETS, samples=SAMPLES)
 
-rule cell_wise_splitting_Project_Achilles:
+rule splitter:
     input:
-        os.path.join(resources, 'FC', 'Project_Achilles_corrected_FCs.tsv')
+        os.path.join(resources, 'FC', dataset_FC)
     output:
-        directory(os.path.join(resources, 'FC', 'Project_Achilles_cells'))
-    conda:
-        'envs/MinTEs.yaml'
+        expand(os.path.join(resources, 'FC', 'Project_' + dataset + '_cells', '{samples}'), 
+                samples=SAMPLES)
+    conda: 'envs/MinTEs.yaml'
+    params:
+        path = os.path.join(resources, 'FC', 'Project_' + dataset + '_cells')
     shell:
-        '''
-        mkdir -p {output}
-        python3 workflows/data_preprocessing/scripts/cell_splitter.py -i {input} -p {output}
-        '''
+        """
+        python3 workflows/data_preprocessing/scripts/cell_splitter.py -i {input} -o {params.path}
+        """
 
-rule cell_wise_splitting_Project_Score:
+rule run_BAGEL:
     input:
-        os.path.join(resources, 'FC', 'Project_Score_corrected_FCs.tsv')
+        os.path.join(resources, 'FC', 'Project_' + dataset + '_cells', '{samples}')
     output:
-        directory(os.path.join(resources, 'FC', 'Project_Score_cells'))
-    conda:
-        'envs/MinTEs.yaml'
-    shell:
-        '''
-        mkdir -p {output}
-        python3 workflows/data_preprocessing/scripts/cell_splitter.py -i {input} -p {output}
-        '''
-
-rule run_BAGEL_Project_Achilles:
-    input:
-        os.path.join(resources, 'FC', 'Project_Achilles_cells')
-    output:
-        outdirs = [directory(expand(os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_Achilles_cells'), essential_gene_sets = ESSENTIAL_GENE_SETS))]
+        os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_' + dataset + '_cells', '{samples}')
+    conda: 'envs/MinTEs.yaml'
     params:
         nonessential = 'data/NEGv1.txt',
-        seed = 1234
-    run:
-        cells = subprocess.getoutput('ls resources/FC/Project_Achilles_cells').split('\n')
+        seed = 1234,
+        controls = 1
+    shell:
+        """
+        python3 workflows/data_preprocessing/scripts/BAGEL.py bf -i {input} -o {output} \
+            -e data/{wildcards.essential_gene_sets}.txt -n {params.nonessential} -c {params.controls} -s {params.seed} -r -NS
+        """
 
-        for single_cell in cells:
-            for idx in range(0,2):
-                command = 'scripts/BAGEL.py -i {input}' + '/' + single_cell + ' -o ' \
-                            + output[idx] + '/' + single_cell + ' -e data/' + \
-                            ESSENTIAL_GENE_SETS[idx] + '.txt -n {params.nonessential} -s {params.seed} -r -NS'
-                shell(command)
-
-rule run_BAGEL_Project_Score:
+rule assembler:
     input:
-        os.path.join(resources, 'FC', 'Project_Score_cells')
+        os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_' + dataset + '_cells', 'cell_line_1.tsv')
     output:
-        outdirs = [directory(expand(os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_Score_cells'), essential_gene_sets = ESSENTIAL_GENE_SETS))]
+        os.path.join(resources, 'BF', '{essential_gene_sets}', dataset_BF)
+    conda: 'envs/MinTEs.yaml'
     params:
-        nonessential = 'data/NEGv1.txt',
-        seed = 1234
-    run:
-        cells = subprocess.getoutput('ls resources/FC/Project_Score_cells').split('\n')
-
-        for single_cell in cells:
-            for idx in range(0,2):
-                command = 'scripts/BAGEL.py -i {input}' + '/' + single_cell + ' -o ' \
-                            + output[idx] + '/' + single_cell + ' -e data/' + \
-                            ESSENTIAL_GENE_SETS[idx] + '.txt -n {params.nonessential} -s {params.seed} -r -NS'
-                shell(command)
+        path = os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_' + dataset + '_cells')
+    shell:
+        """
+        python3 workflows/data_preprocessing/scripts/cell_assembler.py -i {params.path} -o {output}
+        """
