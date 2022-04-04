@@ -41,18 +41,19 @@ rule splitter:
 
 rule run_BAGEL:
     input:
-        os.path.join(resources, 'FC', 'Project_' + dataset + '_cells', '{samples}')
+        cell_line = os.path.join(resources, 'FC', 'Project_' + dataset + '_cells', '{samples}'),
+        essential = os.path.join('data', '{essential_gene_sets}.txt'),
+        nonessential = nonessential = 'data/NEGv1.txt'
     output:
         os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_' + dataset + '_cells', '{samples}')
     conda: 'envs/MinTEs.yaml'
     params:
-        nonessential = 'data/NEGv1.txt',
         seed = 1234,
         controls = 1
     shell:
         """
-        python3 workflows/data_preprocessing/scripts/BAGEL.py bf -i {input} -o {output} \
-            -e data/{wildcards.essential_gene_sets}.txt -n {params.nonessential} -c {params.controls} -s {params.seed} -r -NS
+        python3 workflows/data_preprocessing/scripts/BAGEL.py bf -i {input.cell_line} -o {output} \
+            -e {input.essential}.txt -n {input.nonessential} -c {params.controls} -s {params.seed} -r -NS
         """
 
 rule assembler:
