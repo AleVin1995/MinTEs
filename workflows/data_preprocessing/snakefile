@@ -31,29 +31,27 @@ rule splitter:
     output:
         expand(os.path.join(resources, 'FC', 'Project_' + dataset + '_cells', '{samples}'), 
                 samples=SAMPLES)
-    conda: 'envs/MinTEs.yaml'
     params:
         path = os.path.join(resources, 'FC', 'Project_' + dataset + '_cells')
     shell:
         """
-        python3 workflows/data_preprocessing/scripts/cell_splitter.py -i {input} -o {params.path}
+        python3 workflows/data_preprocessing/src/cell_splitter.py -i {input} -o {params.path}
         """
 
 rule run_BAGEL:
     input:
         cell_line = os.path.join(resources, 'FC', 'Project_' + dataset + '_cells', '{samples}'),
         essential = os.path.join('data', '{essential_gene_sets}.txt'),
-        nonessential = nonessential = 'data/NEGv1.txt'
+        nonessential ='data/NEGv1.txt'
     output:
         os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_' + dataset + '_cells', '{samples}')
-    conda: 'envs/MinTEs.yaml'
     params:
         seed = 1234,
         controls = 1
     shell:
         """
-        python3 workflows/data_preprocessing/scripts/BAGEL.py bf -i {input.cell_line} -o {output} \
-            -e {input.essential}.txt -n {input.nonessential} -c {params.controls} -s {params.seed} -r -NS
+        python3 workflows/data_preprocessing/src/BAGEL.py bf -i {input.cell_line} -o {output} \
+            -e {input.essential} -n {input.nonessential} -c {params.controls} -s {params.seed} -r -NS
         """
 
 rule assembler:
@@ -61,10 +59,9 @@ rule assembler:
         os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_' + dataset + '_cells', 'cell_line_1.tsv')
     output:
         os.path.join(resources, 'BF', '{essential_gene_sets}', dataset_BF)
-    conda: 'envs/MinTEs.yaml'
     params:
         path = os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_' + dataset + '_cells')
     shell:
         """
-        python3 workflows/data_preprocessing/scripts/cell_assembler.py -i {params.path} -o {output}
+        python3 workflows/data_preprocessing/src/cell_assembler.py -i {params.path} -o {output}
         """
