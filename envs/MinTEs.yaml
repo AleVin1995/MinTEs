@@ -14,5 +14,4 @@ dependencies:
   - matplotlib
   - scikit-learn
   - statannot
-  - cookiecutter
 prefix: /home/alessandro.vinceti/miniconda3/envs/MinTEs

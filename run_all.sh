@@ -22,11 +22,13 @@ do
     snakemake -s workflows/data_preprocessing/Snakefile --profile profile
 
     N_datasets=$(ls resources/BF/*/Project_"$dataset"_BF.tsv | wc -l)
+    N_jobs_assemble=$(squeue | grep assemble | wc -l)
 
-    while [[ $N_datasets -lt 2 ]]
+    while [[ $N_datasets -lt 2 && $N_jobs_assemble -eq 0 ]]
     do
         sleep 30
         N_datasets=$(ls resources/BF/*/Project_"$dataset"_BF.tsv | wc -l)
+        N_jobs_assemble=$(squeue | grep assemble | wc -l)
     done
 done
 
