@@ -1,0 +1,7 @@
+import os
+import subprocess
+
+# paths
+ROOT = os.getcwd()
+resources = os.path.join(ROOT, 'resources')
+
