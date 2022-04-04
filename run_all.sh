@@ -3,7 +3,7 @@
 #SBATCH --job-name=main
 #SBATCH --partition=cpuq
 #SBATCH --mail-type=NONE
-#SBATCH --time=03:00:00
+#SBATCH --time=01:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1
 #SBATCH --chdir=/scratch/alessandro.vinceti/Reduced_Templates
