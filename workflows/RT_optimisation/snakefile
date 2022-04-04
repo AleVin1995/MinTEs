@@ -1,3 +1,4 @@
+import numpy as np
 import os
 import subprocess
 
@@ -5,3 +6,64 @@ import subprocess
 ROOT = os.getcwd()
 resources = os.path.join(ROOT, 'resources')
 
+# variables
+DATASETS = ['Achilles', 'Score']
+ESSENTIAL_GENE_SETS = ['ADaM', 'CEGv2']
+PERCENTAGES = [np.around(i, decimals=2) for i in np.arange(0.05, 1, 0.05)]
+N_ITER = [i for i in range(1, 11)]
+CROSS = {'Achilles': 'Score', 'Score': 'Achilles'}
+
+rule all:
+    input:
+        expand(os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT', 'cross_testing', '{percentages}', 'test_{n_iter}.txt'),
+                essential_gene_sets=ESSENTIAL_GENE_SETS, datasets=DATASETS, percentages=PERCENTAGES, n_iter=N_ITER)
+
+rule run_MinTEs:
+    input:
+        corrected_FC = os.path.join(resources, 'FC', 'Project_{datasets}_corrected_FC.tsv'),
+        reference_BF = os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_{datasets}_BF.tsv'),
+        essential = os.path.join('data', '{essential_gene_sets}.txt'),
+        nonessential = nonessential = 'data/NEGv1.txt'
+    output:
+        os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT', '{percentages}', 'test_{n_iter}.txt')
+    params:
+        subsample = lambda wildcards: wildcards.percentages,
+        fraction_train = 0.8,
+        step = 20,
+        seed = 1234
+    shell:
+        """
+        python3 workflows/RT_optimisation/src/MinTEs.py -e {input.essential} -n {input.nonessential} -f {input.corrected_FC} -b {input.reference_BF} \ 
+                -o {output} --scaling --subsample {params.subsample} --step {params.step} --fr-train {params.fraction_train} --seed {params.seed}
+        """
+
+rule cross_testing:
+    input:
+        input_dir_FC = os.path.join(resources, 'FC'),
+        input_dir_BF = os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT', '{percentages}'),
+        input_file = os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT', '{percentages}', 'test_{n_iter}.txt'),
+        essential = os.path.join('data', '{essential_gene_sets}.txt'),
+        nonessential = nonessential = 'data/NEGv1.txt'
+    output:
+        output_dir = os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT', 'cross_testing', '{percentages}'),
+        output_file = os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT', 'cross_testing', '{percentages}', 'test_{n_iter}.txt')
+    params:
+        cross = lambda wildcards: CROSS[wildcards.datasets],
+        n_iter = lambda wildcards: wildcards.n_iter,
+        seed = 1234
+    shell:
+        """
+        cut -f14 {input.input_file} > {output_dir}/RT_ess_{params.n_iter}.txt
+        cut -f15 {input.input_file} > {output_dir}/RT_noness_{params.n_iter}.txt 
+
+        python3 workflows/RT_optimisation/src/MinTEs.py -e {input.essential} -n {input.nonessential} \ 
+                -f {input.input_dir_FC}/Project_{params.cross}_corrected_FC.tsv \
+                -b {input.input_dir_BF}/Project_{params.cross}_BF.tsv \ 
+                -o {output.file} --subess {output_dir}/RT_ess_{params.n_iter}.txt \
+                --subnon {output_dir}/RT_noness_{params.n_iter}.txt --scaling -c --seed {params.seed}
+        
+        sleep 10
+
+        rm {output_dir}/RT_ess_{params.n_iter}.txt 
+        rm {output_dir}/RT_noness_{params.n_iter}.txt 
+        """
