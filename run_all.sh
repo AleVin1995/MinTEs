@@ -27,17 +27,17 @@ do
         snakemake -s workflows/data_preprocessing/snakefile --profile workflows/data_preprocessing/config
 
         N_datasets=0
-        N_jobs_assemble=0
+        N_jobs_scaling=0
 
-        while [[ $N_datasets -lt 2 && $N_jobs_assemble -eq 0 ]]
+        while [[ $N_datasets -lt 2 && $N_jobs_scaling -eq 0 ]]
         do
             sleep 30
-            N_datasets=$(ls resources/BF/*/ | grep $dataset | grep tsv | wc -l)
-            N_jobs_assemble=$(squeue | grep assemble | wc -l)
+            N_datasets=$(ls resources/BF/*/ | grep $dataset | grep scaled | wc -l)
+            N_jobs_assemble=$(squeue | grep scaling | wc -l)
         done
 
         sleep 30
-        N_cells_BF=$(head -1 resources/BF/*/Project_"$dataset"_BF.tsv | wc -w)
+        N_cells_BF=$(head -1 resources/BF/*/Project_"$dataset"_scaled_BF.tsv | wc -w)
         
         if [[ $N_cells_FC -gt $N_cells_BF ]]
         then

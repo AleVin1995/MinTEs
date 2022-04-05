@@ -73,6 +73,8 @@ def main():
 
         thr_bf = np.min(bf_train_sort[thr_pos])
         dataset.iloc[:, cell_idx] -= thr_bf
+    
+    dataset.to_csv(options.output, sep='\t', index=False)
 
 if __name__ == '__main__':
     main()
