@@ -30,8 +30,8 @@ rule splitter:
     input:
         os.path.join(resources, 'FC', dataset_FC)
     output:
-        expand(os.path.join(resources, 'FC', 'Project_' + dataset + '_cells', '{samples}'), 
-                samples=SAMPLES)
+        temp(expand(os.path.join(resources, 'FC', 'Project_' + dataset + '_cells', '{samples}'), 
+                samples=SAMPLES))
     params:
         path = os.path.join(resources, 'FC', 'Project_' + dataset + '_cells')
     shell:
@@ -59,7 +59,7 @@ rule assembler:
     input:
         os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_' + dataset + '_cells', 'cell_line_1.tsv')
     output:
-        os.path.join(resources, 'BF', '{essential_gene_sets}', dataset_BF)
+        temp(os.path.join(resources, 'BF', '{essential_gene_sets}', dataset_BF))
     params:
         path = os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_' + dataset + '_cells')
     shell:

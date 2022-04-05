@@ -23,7 +23,7 @@ rule run_MinTEs:
         corrected_FC = os.path.join(resources, 'FC', 'Project_{datasets}_corrected_FC.tsv'),
         reference_BF = os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_{datasets}_BF.tsv'),
         essential = os.path.join('data', '{essential_gene_sets}.txt'),
-        nonessential = nonessential = 'data/NEGv1.txt'
+        nonessential = 'data/NEGv1.txt'
     output:
         os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT', '{percentages}', 'test_{n_iter}.txt')
     params:
@@ -43,7 +43,7 @@ rule cross_testing:
         input_dir_BF = os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT', '{percentages}'),
         input_file = os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT', '{percentages}', 'test_{n_iter}.txt'),
         essential = os.path.join('data', '{essential_gene_sets}.txt'),
-        nonessential = nonessential = 'data/NEGv1.txt'
+        nonessential = 'data/NEGv1.txt'
     output:
         output_dir = os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT', 'cross_testing', '{percentages}'),
         output_file = os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT', 'cross_testing', '{percentages}', 'test_{n_iter}.txt')
