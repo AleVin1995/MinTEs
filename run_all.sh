@@ -3,7 +3,7 @@
 #SBATCH --job-name=main
 #SBATCH --partition=cpuq
 #SBATCH --mail-type=NONE
-#SBATCH --time=01:00:00
+#SBATCH --time=02:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1
 #SBATCH --chdir=/scratch/alessandro.vinceti/Reduced_Templates
@@ -18,8 +18,8 @@ echo 'Finished downloading data'
 echo 'Data preprocessing'
 for dataset in "Achilles" "Score"
 do
-    N_cells_FC=$(2*$((head -1 resources/FC/Project_"$dataset"_corrected_FC.tsv | wc -l)))
-    N_cells_BF=$(head -1 resources/BF/*/Project_"$dataset"_BF.tsv | wc -l)
+    N_cells_FC=$((2*$(head -1 resources/FC/Project_"$dataset"_corrected_FC.tsv | wc -w)))
+    N_cells_BF=0
 
     while [[ $N_cells_FC -gt $N_cells_BF ]]
     do
@@ -37,7 +37,7 @@ do
         done
 
         sleep 30
-        N_cells_BF=$(head -1 resources/BF/*/Project_"$dataset"_BF.tsv | wc -l)
+        N_cells_BF=$(head -1 resources/BF/*/Project_"$dataset"_BF.tsv | wc -w)
         
         if [[ $N_cells_FC -gt $N_cells_BF ]]
         then

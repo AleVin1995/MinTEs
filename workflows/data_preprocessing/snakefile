@@ -12,6 +12,7 @@ project_file.close()
 
 dataset_FC = 'Project_' + dataset + '_corrected_FC.tsv'
 dataset_BF = 'Project_' + dataset + '_BF.tsv'
+dataset_BF_scaled = 'Project_' + dataset + '_scaled_BF.tsv'
 
 ESSENTIAL_GENE_SETS = ['ADaM', 'CEGv2']
 
@@ -20,7 +21,7 @@ SAMPLES = ['cell_line_' + str(idx) + '.tsv' for idx in range(1, n_cells-1)]
 
 rule all:
     input:
-        expand(os.path.join(resources, 'BF', '{essential_gene_sets}', dataset_BF),
+        expand(os.path.join(resources, 'BF', '{essential_gene_sets}', dataset_BF_scaled),
                 essential_gene_sets=ESSENTIAL_GENE_SETS),
         expand(os.path.join(resources, 'BF', '{essential_gene_sets}', 'Project_' + dataset + '_cells', '{samples}'),
                 essential_gene_sets=ESSENTIAL_GENE_SETS, samples=SAMPLES)
@@ -64,4 +65,19 @@ rule assembler:
     shell:
         """
         python3 workflows/data_preprocessing/src/cell_assembler.py -i {params.path} -o {output}
+        """
+
+rule scaling:
+    input:
+        dataset = os.path.join(resources, 'BF', '{essential_gene_sets}', dataset_BF),
+        essential = os.path.join('data', '{essential_gene_sets}.txt'),
+        nonessential = 'data/NEGv1.txt'
+    output:
+        os.path.join(resources, 'BF', '{essential_gene_sets}', dataset_BF_scaled)
+    params:
+        fdr = 0.05
+    shell:
+        """
+        python3 workflows/data_preprocessing/src/scaling.py -i {input.dataset} -e {input.essential} \
+                -n {input.nonessential} -o {output} --fdr {params.fdr}
         """
