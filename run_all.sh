@@ -29,11 +29,11 @@ do
         N_datasets=0
         N_jobs_scaling=0
 
-        while [[ $N_datasets -lt 2 && $N_jobs_scaling -eq 0 ]]
+        while [[ $N_datasets -lt 2 || $N_jobs_scaling -ne 0 ]]
         do
             sleep 30
             N_datasets=$(ls resources/BF/*/ | grep $dataset | grep scaled | wc -l)
-            N_jobs_assemble=$(squeue | grep scaling | wc -l)
+            N_jobs_scaling=$(squeue | grep scaling | wc -l)
         done
 
         sleep 30
@@ -41,12 +41,15 @@ do
         
         if [[ $N_cells_FC -gt $N_cells_BF ]]
         then
-            rm resources/BF/*/Project_"$dataset"_BF.tsv
+            rm -r resources/FC/*cells
+            rm -r resources/BF
         fi
     done
 done
 
 rm project.txt
+rm -r resources/FC/*cells
+rm -r resources/BF/*/*cells
 echo 'Assembling and scaling of sgRNA-level Bayes factor datasets'
 
 #rm slurm*

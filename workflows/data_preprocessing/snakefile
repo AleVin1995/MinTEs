@@ -30,8 +30,8 @@ rule splitter:
     input:
         os.path.join(resources, 'FC', dataset_FC)
     output:
-        temp(expand(os.path.join(resources, 'FC', 'Project_' + dataset + '_cells', '{samples}'), 
-                samples=SAMPLES))
+        expand(os.path.join(resources, 'FC', 'Project_' + dataset + '_cells', '{samples}'), 
+                samples=SAMPLES)
     params:
         path = os.path.join(resources, 'FC', 'Project_' + dataset + '_cells')
     shell:
@@ -69,15 +69,17 @@ rule assembler:
 
 rule BF_scaling:
     input:
-        dataset = os.path.join(resources, 'BF', '{essential_gene_sets}', dataset_BF),
+        input_dataset = os.path.join(resources, 'BF', '{essential_gene_sets}', dataset_BF),
         essential = os.path.join('data', '{essential_gene_sets}.txt'),
         nonessential = 'data/NEGv1.txt'
     output:
         os.path.join(resources, 'BF', '{essential_gene_sets}', dataset_BF_scaled)
     params:
+        dataset = dataset,
+        essential = lambda wildcards: wildcards.essential_gene_sets,
         fdr = 0.05
     shell:
         """
-        python3 workflows/data_preprocessing/src/BF_scaling.py -i {input.dataset} -e {input.essential} \
+        python3 workflows/data_preprocessing/src/BF_scaling.py -i {input.input_dataset} -e {input.essential} \
                 -n {input.nonessential} -o {output} --fdr {params.fdr}
         """
