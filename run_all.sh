@@ -3,7 +3,7 @@
 #SBATCH --job-name=main
 #SBATCH --partition=cpuq
 #SBATCH --mail-type=NONE
-#SBATCH --time=02:00:00
+#SBATCH --time=24:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1
 #SBATCH --chdir=/scratch/alessandro.vinceti/Reduced_Templates
@@ -50,8 +50,12 @@ done
 rm project.txt
 rm -r resources/FC/*cells
 rm -r resources/BF/*/*cells
-echo 'Assembling and scaling of sgRNA-level Bayes factor datasets'
+echo 'Finished data preprocessing'
 
-#rm slurm*
-#rm -r .snakemake/
-#rm -r log/
+echo 'Reduced templates (RT) optimisation'
+snakemake -s workflows/RT_optimisation/snakefile --profile workflows/RT_optimisation/config
+echo 'Finished RT optimisation'
+
+rm slurm*
+rm -r .snakemake/
+rm -r log/

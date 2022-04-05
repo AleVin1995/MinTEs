@@ -572,11 +572,13 @@ def main():
     # full reference templates
     if options.subess != None and options.subnon != None:
         sub_ess = pd.read_table(options.subess)
-        sub_ess = sub_ess.loc[sub_ess.iloc[:, 0].isin(coreEss), "GENE"]
+        sub_ess = sub_ess.loc[sub_ess.iloc[:,0].isin(coreEss),:]
+        sub_ess = sub_ess.iloc[:,0]
         sub_ess = sub_ess.to_numpy().flatten()
 
         sub_non = pd.read_table(options.subnon)
-        sub_non = sub_non.loc[sub_non.iloc[:, 0].isin(nonEss), "GENE"]
+        sub_non = sub_non.loc[sub_non.iloc[:,0].isin(nonEss),:]
+        sub_non = sub_non.iloc[:,0]
         sub_non = sub_non.to_numpy().flatten()
         res = testing(fc, bf, coreEss, nonEss, sub_ess, sub_non, 
                         options.scaling)
