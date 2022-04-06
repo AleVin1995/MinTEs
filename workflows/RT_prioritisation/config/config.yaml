@@ -1,0 +1,21 @@
+cluster:
+  mkdir -p log/{rule} &&
+  sbatch
+    --job-name={rule}
+    --cpus-per-task=1
+    --mem={resources.mem_mb}
+    --time={resources.time}
+    --output=log/{rule}/{jobid}.out
+    --error=log/{rule}/{jobid}.err
+
+default-resources:
+  - partition=cpuq
+  - mem_mb=3000
+  - disk_mb=3000
+  - time=600
+
+restart-times: 2
+jobs: 10
+max-jobs-per-second: 20
+latency-wait: 60
+keep-going: True

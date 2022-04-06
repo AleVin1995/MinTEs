@@ -1,0 +1,49 @@
+import numpy as np
+import os
+import subprocess
+
+# paths
+ROOT = os.getcwd()
+resources = os.path.join(ROOT, 'resources')
+
+# variables
+DATASETS = ['Achilles', 'Score']
+ESSENTIAL_GENE_SETS = ['ADaM', 'CEGv2']
+
+rule all:
+    input:
+        os.path.join(resources, 'RT_sets', 'library-specific_RTs'),
+        os.path.join(resources, 'RT_sets', 'library-independent_RTs')
+
+rule ranking:
+    input:
+        RT = expand(os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT'),
+                    essential_gene_sets=ESSENTIAL_GENE_SETS, datasets=DATASETS)
+        cross = expand(os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT_cross_testing'),
+                        essential_gene_sets=ESSENTIAL_GENE_SETS, datasets=DATASETS)
+    output:
+        os.path.join(resources, 'RT_sets', 'RT_sets_ranking.tsv')
+    shell:
+        """
+        python3 workflows/RT_prioritisation/src/ranking.py --RT '{input.RT}' --cross '{input.cross}' -o {output}
+        """
+
+rule library_specific_RT:
+    input:
+        os.path.join(resources, 'RT_sets', 'RT_sets_ranking.tsv')
+    output:
+        directory(os.path.join(resources, 'RT_sets', 'library-specific_RTs'))
+    shell:
+        """
+        python3 workflows/RT_prioritisation/src/library_specific_RT.py -i {input} -o {output}
+        """
+
+rule library_independent_RT:
+    input:
+        os.path.join(resources, 'RT_sets', 'RT_sets_ranking.tsv')
+    output:
+        directory(os.path.join(resources, 'RT_sets', 'library-independent_RTs'))
+    shell:
+        """
+        python3 workflows/RT_prioritisation/src/library_independent_RT.py -i {input} -o {output}
+        """
