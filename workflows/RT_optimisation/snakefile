@@ -10,7 +10,7 @@ resources = os.path.join(ROOT, 'resources')
 DATASETS = ['Achilles', 'Score']
 ESSENTIAL_GENE_SETS = ['ADaM', 'CEGv2']
 PERCENTAGES = [np.around(i, decimals=2) for i in np.arange(0.05, 0.99, 0.05)]
-N_ITER = [i for i in range(1, 1001)]
+N_ITER = [i for i in range(1, 6)]
 CROSS = {'Achilles': 'Score', 'Score': 'Achilles'}
 
 rule all:
@@ -30,7 +30,7 @@ rule run_MinTEs:
         subsample = lambda wildcards: wildcards.percentages,
         fraction_train = 0.8,
         step = 1,
-        seed = 1234
+        seed = lambda wildcards: wildcards.n_iter
     shell:
         """
         python3 workflows/RT_optimisation/src/MinTEs.py -e {input.essential} -n {input.nonessential} -f {input.corrected_FC} -b {input.reference_BF} \
@@ -50,7 +50,7 @@ rule cross_testing:
         output_dir = os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT_cross_testing', '{percentages}'),
         cross = lambda wildcards: CROSS[wildcards.datasets],
         n_iter = lambda wildcards: wildcards.n_iter,
-        seed = 1234
+        seed = lambda wildcards: wildcards.n_iter
     shell:
         """
         cut -f14 {input.input_file} | awk 'NF > 0' > {params.output_dir}/RT_ess_{params.n_iter}.txt

@@ -12,7 +12,7 @@ default-resources:
   - partition=cpuq
   - mem_mb=3000
   - disk_mb=3000
-  - time=600
+  - time=21600
 
 restart-times: 2
 jobs: 800
