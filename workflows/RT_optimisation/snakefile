@@ -15,7 +15,7 @@ CROSS = {'Achilles': 'Score', 'Score': 'Achilles'}
 
 rule all:
     input:
-        expand(os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT', 'cross_testing', '{percentages}', 'cross_test_{n_iter}.txt'),
+        expand(os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT_cross_testing', '{percentages}', 'cross_test_{n_iter}.txt'),
                 essential_gene_sets=ESSENTIAL_GENE_SETS, datasets=DATASETS, percentages=PERCENTAGES, n_iter=N_ITER)
 
 rule run_MinTEs:
@@ -29,7 +29,7 @@ rule run_MinTEs:
     params:
         subsample = lambda wildcards: wildcards.percentages,
         fraction_train = 0.8,
-        step = 20,
+        step = 1,
         seed = 1234
     shell:
         """
@@ -43,11 +43,11 @@ rule cross_testing:
         essential = os.path.join('data', '{essential_gene_sets}.txt'),
         nonessential = 'data/NEGv1.txt'
     output:
-        os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT', 'cross_testing', '{percentages}', 'cross_test_{n_iter}.txt')
+        os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT_cross_testing', '{percentages}', 'cross_test_{n_iter}.txt')
     params:
         input_dir_FC = os.path.join(resources, 'FC'),
         input_dir_BF = os.path.join(resources, 'BF', '{essential_gene_sets}'),
-        output_dir = os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT', 'cross_testing', '{percentages}'),
+        output_dir = os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT_cross_testing', '{percentages}'),
         cross = lambda wildcards: CROSS[wildcards.datasets],
         n_iter = lambda wildcards: wildcards.n_iter,
         seed = 1234

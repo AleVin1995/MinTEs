@@ -158,12 +158,15 @@ def testing(fold_change, bayes_factor, essential_genes, non_essential_genes,
         else:
             JScell[i] = 0.0
     
+    JS_test = np.mean(JScell)
+    JS_test = np.round(JS_test, 4)
+
     # prepare output dictionary with all summary data
     top = max(len(coreEss), len(nonEss), len(cells), len(JScell), len(sub_ess), len(sub_non))
     Xnan = [float("nan")]
 
     res = dict()
-    res["JS_test"] = (np.array(JScell)).tolist() + Xnan * (top - len(JScell))
+    res["JS_test"] = [JS_test] + Xnan * (top - 1)
     res["scaling"] = [scaling] + Xnan * (top - 1)
     res["cells"] = cells.tolist() + Xnan * (top - len(cells))
     res["coreEss"] = coreEss.tolist() + Xnan * (top - len(coreEss))
