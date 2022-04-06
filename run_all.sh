@@ -56,6 +56,10 @@ echo 'Reduced templates (RT) optimisation'
 snakemake -s workflows/RT_optimisation/snakefile --profile workflows/RT_optimisation/config
 echo 'Finished RT optimisation'
 
+echo 'RT prioritisation'
+snakemake -s workflows/RT_prioritisation/snakefile --profile workflows/RT_prioritisation/config
+echo 'Finished RT prioritisation'
+
 rm slurm*
 rm -r .snakemake/
 rm -r log/

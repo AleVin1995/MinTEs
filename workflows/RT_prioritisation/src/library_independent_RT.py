@@ -11,9 +11,8 @@ def main():
       
     # add options
     parser.add_option('-i', '--input',
-                    dest = 'RT',
+                    dest = 'input',
                     type = 'string',
-                    action='callback',
                     help = 'path to file ranking RT sets')
     parser.add_option('-o', '--output',
                     dest = 'output',
@@ -28,18 +27,19 @@ def main():
     # selection top library specific RT
     idx = ranking_df.groupby(['Essential_gene_set', 'Subsampling'])['lib_indep_RT_score'].transform(max) == ranking_df['lib_indep_RT_score']
     ranking_df = ranking_df[idx]
+    ranking_df = ranking_df.reset_index()
 
     for set_idx in range(0, len(ranking_df)):
-        essential_gene_set = ranking_df.loc[counter, 'Essential_gene_set']
-        project = ranking_df.loc[counter, 'Project']
-        subsampling = ranking_df.loc[counter, 'Subsampling']
-        iteration = str(int(ranking_df.loc[counter, 'Iteration']))
-
+        essential_gene_set = ranking_df.loc[set_idx, 'Essential_gene_set']
+        project = ranking_df.loc[set_idx, 'Project']
+        subsampling = str(ranking_df.loc[set_idx, 'Subsampling'])
+        iteration = str(int(ranking_df.loc[set_idx, 'Iteration']))
+        
         RT_ess = pd.DataFrame()
         RT_noness = pd.DataFrame()
-
-        test_file = pd.read_csv(os.path.join('resources/BF', essential_gene_set, project + '_RT', subsampling, 'test_' + iteration + '.txt'))
-
+        
+        test_file = pd.read_csv(os.path.join('resources/BF', essential_gene_set, project + '_RT', subsampling, 'test_' + iteration + '.txt'), sep='\t')
+        
         RT_ess['GENE'] = test_file['combo_ess'].dropna()
         RT_noness['GENE'] = test_file['combo_non'].dropna()
 

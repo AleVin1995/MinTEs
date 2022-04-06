@@ -10,7 +10,7 @@ resources = os.path.join(ROOT, 'resources')
 DATASETS = ['Achilles', 'Score']
 ESSENTIAL_GENE_SETS = ['ADaM', 'CEGv2']
 PERCENTAGES = [np.around(i, decimals=2) for i in np.arange(0.05, 0.99, 0.05)]
-N_ITER = [i for i in range(1, 6)]
+N_ITER = [i for i in range(1, 1001)]
 CROSS = {'Achilles': 'Score', 'Score': 'Achilles'}
 
 rule all:

@@ -18,7 +18,7 @@ rule all:
 rule ranking:
     input:
         RT = expand(os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT'),
-                    essential_gene_sets=ESSENTIAL_GENE_SETS, datasets=DATASETS)
+                    essential_gene_sets=ESSENTIAL_GENE_SETS, datasets=DATASETS),
         cross = expand(os.path.join(resources, 'BF', '{essential_gene_sets}', '{datasets}_RT_cross_testing'),
                         essential_gene_sets=ESSENTIAL_GENE_SETS, datasets=DATASETS)
     output:
@@ -35,6 +35,8 @@ rule library_specific_RT:
         directory(os.path.join(resources, 'RT_sets', 'library-specific_RTs'))
     shell:
         """
+        mkdir -p {output}
+
         python3 workflows/RT_prioritisation/src/library_specific_RT.py -i {input} -o {output}
         """
 
@@ -45,5 +47,7 @@ rule library_independent_RT:
         directory(os.path.join(resources, 'RT_sets', 'library-independent_RTs'))
     shell:
         """
+        mkdir -p {output}
+        
         python3 workflows/RT_prioritisation/src/library_independent_RT.py -i {input} -o {output}
         """
