@@ -29,7 +29,7 @@ rule run_MinTEs:
     params:
         subsample = lambda wildcards: wildcards.percentages,
         fraction_train = 0.8,
-        step = 1,
+        step = 20,
         seed = lambda wildcards: wildcards.n_iter
     shell:
         """

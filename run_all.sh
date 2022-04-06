@@ -33,7 +33,7 @@ do
         do
             sleep 30
             N_datasets=$(ls resources/BF/*/ | grep $dataset | grep scaled | wc -l)
-            N_jobs_scaling=$(squeue | grep scaling | wc -l)
+            N_jobs_scaling=$(squeue | grep BF_sca | wc -l)
         done
 
         sleep 30
@@ -41,8 +41,7 @@ do
         
         if [[ $N_cells_FC -gt $N_cells_BF ]]
         then
-            rm -r resources/FC/*cells
-            rm -r resources/BF
+            rm resources/BF/*/Project_"$dataset"_scaled_BF.tsv
         fi
     done
 done
