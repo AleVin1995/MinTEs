@@ -4,7 +4,6 @@ channels:
   - defaults
 dependencies:
   - click
-  - snakemake
   - seaborn
   - numpy
   - jupyter
@@ -13,4 +12,3 @@ dependencies:
   - scipy
   - matplotlib
   - scikit-learn
-  - statannot

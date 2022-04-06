@@ -1,5 +1,5 @@
 # Reduced gene templates for supervised analysis of scale-limited CRISPR-Cas9 fitness screens
-![alt text](https://github.com/AleVin1995/Reduced_Templates/blob/main/images/Graphical_abstract.png)
+![alt text](https://github.com/AleVin1995/MinTEs/blob/main/images/Graphical_abstract.png)
 
 ## Description
 Many analytical tasks performed on data from genome-wide CRISPR-Cas9 screens are either optionally or necessarily performed in a supervised manner. In this scenario, the screening outcomes observed for large sets of positive/negative controls, i.e. genes that are prior known to be essential/nonessential for cell survival, are adopted as benchmark or template classifiers. The analytical tasks accomplished by supervised methods range from quality control [1-5], to fold-change scaling for inter-screen comparisons and interpretability [6-11], to calling statistical significant essential genes [1,9,11-14].<br/>
@@ -10,12 +10,16 @@ This repository contains the snakemake pipeline (coming soon..) to derive reduce
 ## Setup
 Clone code repository and install dependencies:
 ```
-git clone https://github.com/AleVin1995/Reduced_Templates.git
+git clone https://github.com/AleVin1995/MinTEs.git
 
-cd Reduced_Templates
+cd MinTEs
 
 conda env create -f envs/MinTEs.yaml
 ```
+
+Furthermore, figures are reproducible via Jupyter notebooks (available in the notebooks subfolder) and also executable via browser [![Open In 
+Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AleVin1995/MinTEs/blob/master/notebooks/Summary_Colab.ipynb)
+
 
 ## References
 [1] Behan, F.M., Iorio, F., Picco, G., Gonçalves, E., Beaver, C.M., Migliardi, G., Santos, R., Rao, Y., Sassi, F., Pinnelli, M., et al. (2019). Prioritization of cancer therapeutic targets using CRISPR–Cas9 screens. Nature 568, 511–516.
