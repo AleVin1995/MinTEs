@@ -6,6 +6,7 @@ Many analytical tasks performed on data from genome-wide CRISPR-Cas9 screens are
 However, the size of positive/negative control genes has a significant impact on the scale of the experiment to perform and it proves quite prohibitive for scale-limiteds CRISPR-Cas9 screens (e.g, CRISPR-Cas9 screens using focused libraries, primary cultures, organoids or patient-derived xenografts), where the number of reference genes would become comparable or even larger than that of the genes under investigation.<br/>
 Minimal Template Estimator (MinTEs) [15] is a computational framework for assembling gene templates of reduced size allowing supervised analyses of data from scale-limited CRISPR-Cas9 screens, while having a limited, user-defined impact on the overall library size. MinTEs is trained on two large genome-wide pooled CRISPR-Cas9 datasets from Project Score [16] and Project Achilles [10], respectively.<br/>
 This repository contains the snakemake pipeline to derive reduced gene templates from [15].
+Zenodo DOI [![DOI](https://zenodo.org/badge/463218698.svg)](https://zenodo.org/badge/latestdoi/463218698).
 
 ## Setup
 Clone code repository and install dependencies:
